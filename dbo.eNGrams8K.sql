@@ -12,7 +12,7 @@ Purpose:
  This is the memory optimized version of ngrams8K (see: https://goo.gl/T3DDiY). 
  
  Like ngrams8k, engrams8K is s character-level N-Grams function that outputs a contiguous 
- stream of @N-sized tokens based on an input string (@string). Accepts strings up to 8000
+ stream of @n-sized tokens based on an input string (@string). Accepts strings up to 8000
  varchar characters long. For more information about N-Grams see: https://goo.gl/CYTvTS.
 
 Compatibility:
@@ -49,20 +49,20 @@ Prerequisites:
 
 Syntax:
 --===== Autonomous
- SELECT position, token FROM dbo.eNGrams8K(@string,@N);
+ SELECT position, token FROM dbo.eNGrams8K(@string,@n);
 
 --===== Against a table using APPLY
  SELECT s.SomeID, ng.position, ng.token
  FROM dbo.SomeTable s
- CROSS APPLY dbo.eNGrams8K(s.SomeValue,@N) ng;
+ CROSS APPLY dbo.eNGrams8K(s.SomeValue,@n) ng;
 
 Parameters:
  @string  = The input string to split into tokens.
- @N       = The size of each token returned.
+ @n       = The size of each token returned.
 
 Returns:
  Position = bigint; the position of the token in the input string
- token    = varchar(8000); a @N-sized character-level N-Gram token
+ token    = varchar(8000); a @n-sized character-level N-Gram token
 
 Developer Notes: 
 1. eNGrams8K is not case sensitive
@@ -72,8 +72,8 @@ Developer Notes:
 
 3. ORDER BY is required in the function for it to work correctly.
 
-4. When @N is less than 1 or greater than the datalength of the input string then no
-    tokens (rows) are returned. If either @string or @N are NULL no rows are returned.
+4. When @n is less than 1 or greater than the datalength of the input string then no
+    tokens (rows) are returned. If either @string or @n are NULL no rows are returned.
     This is a debatable topic but the thinking behind this decision is that: because you
     can't split 'xxx' into 4-grams, you can't split a NULL value into unigrams and you
     can't turn anything into NULL-grams, no rows should be returned.
@@ -83,7 +83,7 @@ Developer Notes:
 
     UNION ALL
     SELECT 1, NULL
-    WHERE NOT(@N > 0 AND @N <= DATALENGTH(@string)) OR (@N IS NULL OR @string IS NULL)
+    WHERE NOT(@n > 0 AND @n <= DATALENGTH(@string)) OR (@n IS NULL OR @string IS NULL)
 
 5. eNGrams8K can also be used as a Tally Table with the position column being your "N"
     row. To do so use REPLICATE to create an imaginary string, then use eNGrams8K to split
@@ -109,9 +109,9 @@ Developer Notes:
 
 Usage Examples:
 --===== Turn the string, 'abcd' into unigrams, bigrams and trigrams
- SELECT position, token FROM dbo.eNGrams8K('abcd',1); -- unigrams (@N=1)
- SELECT position, token FROM dbo.eNGrams8K('abcd',2); -- bigrams  (@N=2)
- SELECT position, token FROM dbo.eNGrams8K('abcd',3); -- trigrams (@N=3)
+ SELECT position, token FROM dbo.eNGrams8K('abcd',1); -- unigrams (@n=1)
+ SELECT position, token FROM dbo.eNGrams8K('abcd',2); -- bigrams  (@n=2)
+ SELECT position, token FROM dbo.eNGrams8K('abcd',3); -- trigrams (@n=3)
 
 --===== How many times the substring "AB" appears in each record
  DECLARE @table TABLE(stringID int identity primary key, string varchar(100));
@@ -127,20 +127,18 @@ Usage Examples:
 Revision History:
  Rev 00 - 20170819 - Initial Development - Alan Burstein (original developed 20140310)
 
-
 ****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
 --iTally(N) AS                                   -- my cte Tally Table
 --(
---  SELECT TOP(ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@N,1)-1)),0)))
+--  SELECT TOP(ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@n,1)-1)),0)))
 --    ROW_NUMBER() OVER (ORDER BY (SELECT NULL))    -- Order by a constant to avoid a sort
 --  FROM L1 a CROSS JOIN L1 b                       -- cartesian for 8100 rows (90^2)
 --)
-SELECT TOP(ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@N,1)-1)),0)))
-
+SELECT TOP(ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@n,1)-1)),0)))
   position = N,                                   -- position of the token in the string(s)
-  token    = SUBSTRING(@string,CAST(N AS int),@N) -- the @N-Sized token
+  token    = SUBSTRING(@string,CAST(N AS int),@n) -- the @n-Sized token
 FROM dbo.eTally
-WHERE @N > 0 AND @N <= DATALENGTH(@string)        -- Protection against bad parameter values
+WHERE @n > 0 AND @n <= DATALENGTH(@string)        -- Protection against bad parameter values
 ORDER BY N;
 GO
