@@ -33,9 +33,9 @@ Syntax:
 
 Parameters:
  @string    = varchar(8000); Input string to parse
- @start     = tinyint; the first instance of @delimiter to search for; this is where the
-              output should start. When @start is 0 then the function will return
-              everything from the beginning of @string until @end.
+ @start     = tinyint; the instance of @delimiter to search for; this is where the output 
+              should start. When @start is 0 then the function will return everything from
+              the beginning of @string until @end.
  @stop      = tinyint; the last instance of @delimiter to search for; this is where the
               output should end. When @end is 0 then the function will return everything
               from @start until the end of the string.
