@@ -20,8 +20,8 @@ Syntax:
  CROSS APPLY dbo.RemoveDupes8K(st.SomeColumn1, @preserved) rd;
 
 Parameters:
- @string = varchar(8000); Input string to be "cleaned"
- @preserved = varchar(100); the pattern to preserve. For example, when @preserved='[0-9]'
+ @string    = varchar(8000); Input string to be "cleaned"
+ @preserved = varchar(50); the pattern to preserve. For example, when @preserved='[0-9]'
  only non-numeric characters will be removed
 
 Return Types:
