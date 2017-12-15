@@ -19,11 +19,11 @@ Compatibility:
 
 Syntax:
 --===== Basic Syntax (against parameters)
- SELECT px.cleanedString
+ SELECT px.newString
  FROM dbo.patExclude8K_2017(@string,@pattern) px;
 
 --===== Basic Syntax (against a table)
- SELECT px.cleanedString
+ SELECT px.newString
  FROM dbo.someTable t
  CROSS APPLY dbo.patExclude8K_2017(t.someString,@pattern) px;
 
@@ -39,12 +39,12 @@ Return Types:
 Usage:
 
 --===== Remove all but alpha characters
- SELECT px.cleanedString 
+ SELECT px.newString 
  FROM dbo.SomeTable st
  CROSS APPLY dbo.patExclude8K_2017(st.SomeString,'%[^0-9a-zA-Z]%') px;
 
 --===== Remove all but numeric characters and dots
- SELECT CleanedString
+ SELECT newString
  FROM dbo.SomeTable st
  CROSS APPLY dbo.patExclude8K_2017(st.SomeString,'%[^0-9.]%');
 
@@ -58,8 +58,7 @@ Runnable Examples:
  SELECT newString FROM dbo.patExclude8K_2017('abc123!', '[0-9]'); -- Returns: abc!
 
 -- only return letters and numbers
- SELECT newString FROM dbo.patExclude8K_2017('###abc123!!!', '[^0-9a-z]');
-Returns: abc123
+ SELECT newString FROM dbo.patExclude8K_2017('###abc123!!!', '[^0-9a-z]'); -- Returns: abc123
 
 -- Remove spaces
  SELECT newString FROM dbo.patExclude8K_2017('XXX 123 ZZZ', ' '); -- Returns: XXX123ZZZ
@@ -79,7 +78,7 @@ Developer Notes:
     an inline table valued function (iTVF) but performs the same task as a scalar valued 
     user defined function (UDF); the difference is that it requires the APPLY table 
     operator to accept column values as a parameter. For more about "inline" scalar UDFs 
-    see this article by SQL MVP Jeff Moden: https://goo.gl/vTYf1S; and for more about how 
+    see this article by SQL MVP Jeff Moden: https://goo.gl/vTYf1S; and for more about how
     to use APPLY see the this article by SQL MVP Paul White: https://goo.gl/ryCYqk
 
     Note the above syntax example and usage examples below to better understand how to
