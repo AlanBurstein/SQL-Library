@@ -127,7 +127,7 @@ Revision History:
  Rev 06 - 20171214 - Alan Burstein - Added ORDER BY clause, updated documentation
 *****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
-SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY position) -- your spoon
+SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY position) -- spoon
 FROM dbo.ngrams8k(@string,1) ng
 WHERE 0 = PATINDEX(@pattern, token COLLATE Latin1_General_BIN);
 GO
