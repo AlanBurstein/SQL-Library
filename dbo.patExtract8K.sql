@@ -105,13 +105,13 @@ select
   item       = substring(token,1,isnull(nullif(patindex('%'+@pattern+'%', token),0),8000)-1)
 from
 (
-  select 
-    position,
-  	token = substring(@string, position, 8000)
-  from dbo.NGrams8k(@string, 1)
-  where token not like @pattern 
-  and (position = 1 or substring(@string,checksum(position-1),1) like @pattern)
-) filteredUnigram;
+  select ng.position, substring(@string, ng.position, 8000)
+  from dbo.NGrams8k(@string, 1) ng
+  where ng.token not like @pattern 
+  and  (ng.position = 1 or substring(@string,checksum(ng.position-1),1) like @pattern)
+  order by ng.position
+) filteredUnigram(position, token)
+UNION ALL SELECT 1, 0, @string WHERE nullif(@string,'') is null;
 GO
 
 
