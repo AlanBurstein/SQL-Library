@@ -2,7 +2,7 @@ USE sqlDevToolboxAB;
 GO
 IF OBJECT_ID('dbo.NGrams8k', 'IF') IS NOT NULL DROP FUNCTION dbo.NGrams8k;
 GO
-CREATE FUNCTION dbo.NGrams8k
+CREATE FUNCTION [dbo].[NGrams8k_test]
 (
   @string varchar(8000), -- Input string
   @N      int            -- requested token size
@@ -104,6 +104,10 @@ Revision History:
  Rev 04 - 20151029 - Added ISNULL logic to the TOP clause for the @string and @N
                      parameters to prevent a NULL string or NULL @N from causing "an
                      improper value" being passed to the TOP clause. - Alan Burstein
+ Rev 05 - 20171228 - Small simplification; changed: 
+                  (ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@N,1)-1)),0)))
+                  (ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))+1-ISNULL(@N,1)),0)))
+
 ****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
 WITH
@@ -124,7 +128,7 @@ L1(N) AS
 ),
 iTally(N) AS                                   -- my cte Tally Table
 (
-  SELECT TOP(ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@N,1)-1)),0)))
+  SELECT TOP (ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))+1-ISNULL(@N,1)),0)))
     ROW_NUMBER() OVER (ORDER BY (SELECT NULL))    -- Order by a constant to avoid a sort
   FROM L1 a CROSS JOIN L1 b                       -- cartesian for 8100 rows (90^2)
 )
