@@ -132,6 +132,3 @@ SELECT newString = COALESCE((
   FOR XML PATH(''), TYPE -- TYPE & value clauses handle special XML characters such as "&"
 ).value('text()[1]','varchar(8000)'),@string); -- Return value data type; change as needed
 GO
-
-select * from dbo.patExclude8K('','[0-9]')
-
