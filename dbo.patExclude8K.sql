@@ -119,16 +119,19 @@ Revision History:
  Rev 05 - 20170909 - Alan Burstein - Replaced inline tally table unigram logic w/ ngrams8k
                                    - Updated comments/documentation
 
- Rev 06 - 20171214 - Alan Burstein - Added ORDER BY clause, updated documentation
+ Rev 06 - 20180104 - Alan Burstein - Added ORDER BY clause, updated documentation
+                                   - Added COALESCE to correctly handle 0-len input strings 
+
 *****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
-SELECT newString =
-(
+SELECT newString = COALESCE((
   SELECT ng.token+'' -- token+'' + PATH('') + no ROOT clause only returns the token (no xml)
   FROM dbo.ngrams8k(@string,1) ng
   WHERE 0 = PATINDEX(@pattern, ng.token COLLATE Latin1_General_BIN)
   ORDER BY ng.position   -- your spoon
   FOR XML PATH(''), TYPE -- TYPE & value clauses handle special XML characters such as "&"
-).value('text()[1]','varchar(8000)'); -- Return value data type; change as needed
+).value('text()[1]','varchar(8000)'),@string); -- Return value data type; change as needed
 GO
+
+select * from dbo.patExclude8K('','[0-9]')
 
