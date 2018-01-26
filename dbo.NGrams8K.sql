@@ -2,7 +2,7 @@ USE sqlDevToolboxAB;
 GO
 IF OBJECT_ID('dbo.NGrams8k', 'IF') IS NOT NULL DROP FUNCTION dbo.NGrams8k;
 GO
-CREATE FUNCTION [dbo].[NGrams8k_test]
+CREATE FUNCTION [dbo].[ngrams8k]
 (
   @string varchar(8000), -- Input string
   @N      int            -- requested token size
