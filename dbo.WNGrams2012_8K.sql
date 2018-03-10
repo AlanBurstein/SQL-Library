@@ -83,9 +83,9 @@ WITH
 delim(RN,N) AS -- locate all of the spaces in the string
 (
   SELECT 0,0 UNION ALL
-  SELECT ROW_NUMBER() OVER (ORDER BY position), position
-  FROM dbo.NGrams8k(RTRIM(LTRIM(@string)),1)
-  WHERE token = CHAR(32)
+  SELECT ROW_NUMBER() OVER (ORDER BY ng.position), ng.position
+  FROM dbo.ngrams8k(RTRIM(LTRIM(@string)),1) ng
+  WHERE token = @delim
 ),
 tokens(tokenNumber, token, tokenCount) AS -- Create the tokens
 (
@@ -94,7 +94,7 @@ tokens(tokenNumber, token, tokenCount) AS -- Create the tokens
     SUBSTRING(@string,N+1,ISNULL(LEAD(N,@N) OVER (ORDER BY N)-N,8000)),
      -- count number of spaces in the string then apply the rows-(@N-1) formula
      -- Note: using (@N-2 to compinsate for the extra row in the delim cte).
-    (LEN(@string) - LEN(REPLACE(@string,'-',''))) - (@N-2)
+    (LEN(@string) - LEN(REPLACE(@string,@delim,''))) - (@N-2)
     FROM delim N1
 )
 SELECT 
