@@ -22,6 +22,7 @@ Syntax:
    ng.tokenNumber,
    ng.token
  FROM dbo.WNGrams2012_8K(@string,@delim,@N) ng;
+
 --===== Against another table using APPLY
  SELECT 
    s.SomeID
@@ -93,7 +94,7 @@ tokens(tokenNumber, token, tokenCount) AS -- Create the tokens
     SUBSTRING(@string,N+1,ISNULL(LEAD(N,@N) OVER (ORDER BY N)-N,8000)),
      -- count number of spaces in the string then apply the rows-(@N-1) formula
      -- Note: using (@N-2 to compinsate for the extra row in the delim cte).
-    (LEN(@string) - LEN(REPLACE(@string,' ',''))) - (@N-2)
+    (LEN(@string) - LEN(REPLACE(@string,'-',''))) - (@N-2)
     FROM delim N1
 )
 SELECT 
