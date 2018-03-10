@@ -91,7 +91,7 @@ tokens(tokenNumber, token, tokenCount) AS -- Create the tokens
 (
   SELECT
     RN+1,
-    SUBSTRING(@string,N+1,ISNULL(LEAD(N,@N) OVER (ORDER BY N)-N,8000)),
+    SUBSTRING(@string,N+1,ISNULL(LEAD(N,@N) OVER (ORDER BY N)-N,8000)-1),
      -- count number of spaces in the string then apply the rows-(@N-1) formula
      -- Note: using (@N-2 to compinsate for the extra row in the delim cte).
     (LEN(@string) - LEN(REPLACE(@string,@delim,''))) - (@N-2)
