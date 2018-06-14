@@ -1,8 +1,6 @@
-USE sqlDevToolboxAB;
-GO
 IF OBJECT_ID('dbo.NGrams8k', 'IF') IS NOT NULL DROP FUNCTION dbo.NGrams8k;
 GO
-CREATE FUNCTION [dbo].[ngrams8k]
+CREATE FUNCTION dbo.ngrams8k
 (
   @string varchar(8000), -- Input string
   @N      int            -- requested token size
@@ -107,7 +105,8 @@ Revision History:
  Rev 05 - 20171228 - Small simplification; changed: 
                   (ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))-(ISNULL(@N,1)-1)),0)))
                   (ABS(CONVERT(BIGINT,(DATALENGTH(ISNULL(@string,''))+1-ISNULL(@N,1)),0)))
-
+ Rev 06 - 20180612 - Using CHECKSUM(N) in the to convert N in the token output instead of
+                     using (CAST N as int). CHECKSUM removes the need to convert to int. 
 ****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
 WITH
@@ -134,7 +133,7 @@ iTally(N) AS                                   -- my cte Tally Table
 )
 SELECT
   position = N,                                   -- position of the token in the string(s)
-  token    = SUBSTRING(@string,CAST(N AS int),@N) -- the @N-Sized token
+  token    = SUBSTRING(@string,CHECKSUM(N),@N) -- the @N-Sized token
 FROM iTally
 WHERE @N > 0 AND @N <= DATALENGTH(@string);       -- Protection against bad parameter values
 GO
