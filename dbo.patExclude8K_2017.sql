@@ -91,7 +91,10 @@ Developer Notes:
     unlike a scalar UDFs or multi-line table valued functions, the inline scalar UDF does
     not restrict the query optimizer's ability generate a parallel query execution plan.
 
- 4. patExclude8K_2017 generally performs better with a parallel execution plan
+ 4. patExclude8K_2017 generally performs better with a parallel execution plan but the 
+    optimizer is sometimes stingy about assigning one. Consider performance testing using
+    Traceflag 8649 in Development environments and Adam Machanic's make_parallel in 
+    production environments. 
  
  5. @pattern is case sensitive (but can be easily modified to be case insensitive)
 

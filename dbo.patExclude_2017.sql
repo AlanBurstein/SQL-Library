@@ -9,7 +9,8 @@ CREATE FUNCTION dbo.patExclude_2017
 Purpose:
  Given a string (@string) and a pattern (@pattern) patExclude_2017 removes any character in
  @string that matches the @pattern. This is the varchar(max) version of patExclude8k_2017
- located here: <UPDATE ME>
+ located here: 
+   https://github.com/AlanBurstein/SQL-Library/blob/master/dbo.patExclude8K_2017.sql
 
 Compatibility: 
  SQL Server 2008+;
@@ -67,7 +68,7 @@ Runnable Examples:
 ----------------------------------------------------------------------------------------
 Developer Notes:
 
- 1. Requires nGrams2b located here: https://goo.gl/T3DDiY
+ 1. Requires NGrams2b located here: https://goo.gl/T3DDiY
 
  2. This function is what is referred to as an "inline" scalar UDF." Technically it's an
     inline table valued function (iTVF) but performs the same task as a scalar valued user
@@ -83,9 +84,12 @@ Developer Notes:
     unlike a scalar UDFs or multi-line table valued functions, the inline scalar UDF does
     not restrict the query optimizer's ability generate a parallel query execution plan.
 
- 3. patExclude_2017 generally performs better with a parallel execution plan
+ 3. patExclude_2017 generally performs better with a parallel execution plan but the 
+    optimizer is sometimes stingy about assigning one. Consider performance testing using
+    Traceflag 8649 in Development environments and Adam Machanic's make_parallel in 
+    production environments. 
  
- 4. @pattern is not case sensitive (the function can be easily modified to make it so)
+ 4. @pattern is case sensitive (but can be easily modified to be case insensitive)
 
  5. There is no need to include the "%" before and/or after your pattern since since we 
 	  are evaluating each character individually
@@ -101,7 +105,7 @@ Revision History:
  Rev 00 - 20171214 - Initial Development - Alan Burstein
 *****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
-SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY position) -- spoon
+SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY ng.position) -- spoon
 FROM dbo.ngrams2B(@string,1) ng
 WHERE 0 = PATINDEX(@pattern, token COLLATE Latin1_General_BIN);
 GO
