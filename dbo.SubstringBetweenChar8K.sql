@@ -65,10 +65,15 @@ Developer Notes:
     unlike a scalar UDFs or multi-line table valued functions, the inline scalar UDF does
     not restrict the query optimizer's ability generate a parallel query execution plan.
 
- 3. This function requires both the @first and @last parameters be positive integers.
-    When either is negative, the function will return NULLs.
+ 3. dbo.SubstringBetweenChar8K generally performs better with a parallel execution plan 
+    but the optimizer is sometimes stingy about assigning one. Consider performance 
+    testing using Traceflag 8649 in Development environments and Adam Machanic's 
+    make_parallel in production environments. 
 
- 4. dbo.SubstringBetweenChar8K is deterministic; for more about deterministic and
+ 4. dbo.SubstringBetweenChar8K returns NULL when supplied with a NULL input strings and/or
+    NULL pattern;
+
+ 5. dbo.SubstringBetweenChar8K is deterministic; for more about deterministic and
     nondeterministic functions see https://msdn.microsoft.com/en-us/library/ms178091.aspx
 
 Examples:

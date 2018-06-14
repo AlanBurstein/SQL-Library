@@ -40,9 +40,9 @@ Usage:
  CROSS APPLY dbo.patExclude8K(st.SomeString,'%[^0-9a-zA-Z]%') px;
 
 --===== Remove all but numeric characters and dots
- SELECT newString
+ SELECT f.newString
  FROM dbo.SomeTable st
- CROSS APPLY dbo.PatExclude8K(st.SomeString,'%[^0-9.]%');
+ CROSS APPLY dbo.PatExclude8K(st.SomeString,'%[^0-9.]%') f;
 
 ----------------------------------------------------------------------------------------
 Runnable Examples:
@@ -66,7 +66,7 @@ Runnable Examples:
 ----------------------------------------------------------------------------------------
 Developer Notes:
 
- 1. Requires nGrams8k located here: https://goo.gl/T3DDiY
+ 1. Requires NGrams8k located here: https://goo.gl/T3DDiY
 
  2. This function is what is referred to as an "inline" scalar UDF." Technically it's an
     inline table valued function (iTVF) but performs the same task as a scalar valued user
@@ -82,9 +82,12 @@ Developer Notes:
     unlike a scalar UDFs or multi-line table valued functions, the inline scalar UDF does
     not restrict the query optimizer's ability generate a parallel query execution plan.
 
- 3. patExclude8k generally performs better with a parallel execution plan
+ 3. patExclude8k generally performs better with a parallel execution plan but the 
+    optimizer is sometimes stingy about assigning one. Consider performance testing using
+    Traceflag 8649 in Development environments and Adam Machanic's make_parallel in 
+    production environments. 
  
- 4. @pattern is not case sensitive (the function can be easily modified to make it so)
+ 4. @pattern is case sensitive (the function can be easily modified to make it so)
 
  5. There is no need to include the "%" before and/or after your pattern since since we 
 	  are evaluating each character individually
@@ -116,19 +119,20 @@ Revision History:
 
  Rev 04 - 20170427 - Alan Burstein - Changed final .value logic for text()
 
- Rev 05 - 20170909 - Alan Burstein - Replaced inline tally table unigram logic w/ ngrams8k
-                                   - Updated comments/documentation
+ Rev 05 - 20170909 - Replaced inline tally table unigram logic w/ ngrams8k
+                   - Updated comments/documentation - Alan Burstein
 
- Rev 06 - 20180104 - Alan Burstein - Added ORDER BY clause, updated documentation
-                                   - Added COALESCE to correctly handle 0-len input strings 
+ Rev 06 - 20180104 - Added ORDER BY clause, updated documentation; Added COALESCE to 
+                     correctly handle 0-len input strings - Alan Burstein
 
 *****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
-SELECT newString = COALESCE((
-  SELECT ng.token+'' -- token+'' + PATH('') + no ROOT clause only returns the token (no xml)
-  FROM dbo.ngrams8k(@string,1) ng
+SELECT newString = CASE WHEN @pattern IS NOT NULL THEN 
+  COALESCE((
+  SELECT ng.token+'' -- token+''+PATH('')+ no ROOT clause only returns the token (no xml)
+  FROM dbo.ngrams8k(ISNULL(@string,''),1) ng
   WHERE 0 = PATINDEX(@pattern, ng.token COLLATE Latin1_General_BIN)
-  ORDER BY ng.position   -- your spoon
+  ORDER BY ng.position   -- spoon
   FOR XML PATH(''), TYPE -- TYPE & value clauses handle special XML characters such as "&"
-).value('text()[1]','varchar(8000)'),@string); -- Return value data type; change as needed
+).value('text()[1]','varchar(8000)'), @string) END;
 GO

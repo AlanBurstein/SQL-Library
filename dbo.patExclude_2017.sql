@@ -88,16 +88,18 @@ Developer Notes:
     optimizer is sometimes stingy about assigning one. Consider performance testing using
     Traceflag 8649 in Development environments and Adam Machanic's make_parallel in 
     production environments. 
- 
- 4. @pattern is case sensitive (but can be easily modified to be case insensitive)
 
- 5. There is no need to include the "%" before and/or after your pattern since since we 
+ 4. patExclude_2017 returns NULL on NULL input strings and/or NULL input pattern;
+ 
+ 5. @pattern is case sensitive (but can be easily modified to be case insensitive)
+
+ 6. There is no need to include the "%" before and/or after your pattern since since we 
 	  are evaluating each character individually
 
- 6. Latin1_General_BIN used in the PATINDEX statement improves performance and causes the
+ 7. Latin1_General_BIN used in the PATINDEX statement improves performance and causes the
     function to perform case sensitive comparisons. This can be safely removed or changed.
  
- 7. patExclude_2017 is deterministic; for more about deterministic and nondeterministic 
+ 8. patExclude_2017 is deterministic; for more about deterministic and nondeterministic 
     functions see https://msdn.microsoft.com/en-us/library/ms178091.aspx
 
 ----------------------------------------------------------------------------------------
@@ -109,3 +111,4 @@ SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY ng.position) -
 FROM dbo.ngrams2B(@string,1) ng
 WHERE 0 = PATINDEX(@pattern, token COLLATE Latin1_General_BIN);
 GO
+
