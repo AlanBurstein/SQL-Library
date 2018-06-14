@@ -50,6 +50,9 @@ Developer Notes:
  
  3. When @date or @days is NULL the function will return a NULL value
 
+ 4. firstOfDay is deterministic; for more about deterministic and nondeterministic 
+    functions see https://msdn.microsoft.com/en-us/library/ms178091.aspx
+
 Examples:
 --==== Basic use ->
   SELECT f.dayStart FROM dbo.firstOfDay(getdate(),   0) f; -- start of today

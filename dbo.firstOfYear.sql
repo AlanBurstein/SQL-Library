@@ -56,6 +56,9 @@ Developer Notes:
     go back more than 256 years. Tinyint, however, does not support negative numbers which
     are this function requires when users want to return previous years. 
 
+ 4. firstOfYear is deterministic; for more about deterministic and nondeterministic 
+    functions see https://msdn.microsoft.com/en-us/library/ms178091.aspx
+
 Examples:
 --==== Basic use ->
   DECLARE @date datetime = getdate();

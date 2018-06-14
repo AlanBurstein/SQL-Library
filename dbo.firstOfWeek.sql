@@ -51,6 +51,9 @@ Developer Notes:
  
  3. When @date or @weeks is NULL the function will return a NULL value
 
+ 4. firstOfWeek is deterministic; for more about deterministic and nondeterministic
+    functions see https://msdn.microsoft.com/en-us/library/ms178091.aspx
+
 Examples:
 --==== Basic use ->
   DECLARE @date datetime = getdate();

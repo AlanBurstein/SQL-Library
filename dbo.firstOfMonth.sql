@@ -51,6 +51,19 @@ Developer Notes:
  
  3. When @date or @months is NULL the function will return a NULL value
 
+ 4. On SQL instances earlier than Version 2012, where eoMonth is not available, this 
+    function can easily be used to retrieve the end of month by simply grabbing the
+    next month and subtracting one day using: DATEADD(dd, -1, f.monthStart). Note that the
+    the following two queries will return the end of the current month:
+
+		-- using dbo.firstOfMonth >>
+    SELECT DATEADD(dd, -1, f.monthStart) FROM dbo.firstOfMonth(getdate(),  1) f;
+		-- using eomonth in SQL 2012+
+    SELECT eomonth(getdate(), 0)
+
+ 5. firstOfMonth is deterministic; for more about deterministic and nondeterministic 
+    functions see https://msdn.microsoft.com/en-us/library/ms178091.aspx
+
 Examples:
 --==== Basic use ->
   DECLARE @date datetime = getdate();
