@@ -18,7 +18,7 @@ Compatibility:
  SQL Server 2017+ (Leverages STRING_AGG)
 
 Syntax:
---===== Basic Syntax (against parameters)
+--===== Basic Syntax
  SELECT px.newString
  FROM dbo.patExclude8K_2017(@string,@pattern) px;
 
@@ -49,27 +49,31 @@ Usage:
  CROSS APPLY dbo.patExclude8K_2017(st.SomeString,'%[^0-9.]%');
 
 ----------------------------------------------------------------------------------------
-Runnable Examples:
+--====Runnable Examples:
 	
 --remove letters
- SELECT newString FROM dbo.patExclude8K_2017('abc123!', '[a-z]'); -- Returns: 123!
+ SELECT f.newString 
+ FROM dbo.patExclude8K_2017('abc123!', '[a-z]') f; -- Returns: 123!
 
 -- remove numbers
- SELECT newString FROM dbo.patExclude8K_2017('abc123!', '[0-9]'); -- Returns: abc!
+ SELECT f.newString 
+ FROM dbo.patExclude8K_2017('abc123!', '[0-9]') f; -- Returns: abc!
 
--- only return letters and numbers
- SELECT newString FROM dbo.patExclude8K_2017('###abc123!!!', '[^0-9a-z]'); -- Returns: abc123
+-- return only return letters and numbers
+ SELECT f.newString 
+ FROM dbo.patExclude8K_2017('###abc123!!!', '[^0-9a-z]') f; -- Returns: abc123
 
 -- Remove spaces
- SELECT newString FROM dbo.patExclude8K_2017('XXX 123 ZZZ', ' '); -- Returns: XXX123ZZZ
+ SELECT f.newString 
+ FROM dbo.patExclude8K_2017('XXX 123 ZZZ', ' ') f; -- Returns: XXX123ZZZ
 
 -- only return letters and "!, ? or ."
- SELECT newString 
- FROM dbo.patExclude8K_2017('123# What?!... ', '[^A-Za-z!?.]')  -- Returns: What?!...
+ SELECT f.newString 
+ FROM dbo.patExclude8K_2017('123# What?!... ', '[^A-Za-z!?.]') f; -- Returns: What?!...
 ----------------------------------------------------------------------------------------
 Developer Notes:
 
- 1. Requires nGrams8k located here: https://goo.gl/T3DDiY. 
+ 1. Requires NGrams8k located here: https://goo.gl/T3DDiY. 
  
  2. patExclude8K_2017 is identical to patExclude8K but leverages SQL Server 2017's 
     STRING_AGG (https://goo.gl/G7Urrb) for concatination
@@ -89,7 +93,7 @@ Developer Notes:
 
  4. patExclude8K_2017 generally performs better with a parallel execution plan
  
- 5. @pattern is not case sensitive (the function can be easily modified to make it so)
+ 5. @pattern is case sensitive (but can be easily modified to be case insensitive)
 
  6. There is no need to include the "%" before and/or after your pattern since since we 
 	  are evaluating each character individually
@@ -102,32 +106,12 @@ Developer Notes:
 
 ----------------------------------------------------------------------------------------
 Revision History:
- Rev 00 - 20141027 Initial Development - Alan Burstein
-
- Rev 01 - 20141029 - Alan Burstein
-		- Redesigned based on the dbo.STRIP_NUM_EE by Eirikur Eiriksson
-		  (see: http://www.sqlservercentral.com/Forums/Topic1585850-391-2.aspx)
-		- change how the cte tally table is created 
-		- put the include/exclude logic in a CASE statement instead of a WHERE clause
-		- Added Latin1_General_BIN Colation
-    - Added code to use the pattern as a parameter.
-
- Rev 02	- 20141106
-		- Added final performane enhancement (more cudo's to Eirikur Eiriksson)
-		- Put 0 = PATINDEX filter logic into the WHERE clause
-
- Rev 03 - 20150516 - Alan Burstein
-        - Updated code to deal with special XML characters
-
- Rev 04 - 20170427 - Alan Burstein - Changed final .value logic for text()
-
- Rev 05 - 20170909 - Alan Burstein - Replaced inline tally table unigram logic w/ ngrams8k
-                                   - Updated comments/documentation
-
- Rev 06 - 20171214 - Alan Burstein - Added ORDER BY clause, updated documentation
+ Rev 00 - 20171214 - Initial Development (2017 version) - Alan Burstein
+ Rev 01 - 20180614 - Updated code to include aliasing and updated comments 
+                   - Alan Burstein
 *****************************************************************************************/
 RETURNS TABLE WITH SCHEMABINDING AS RETURN
-SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY position) -- spoon
+SELECT newString = STRING_AGG(ng.token,'') WITHIN GROUP (ORDER BY ng.position) -- spoon
 FROM dbo.ngrams8k(@string,1) ng
 WHERE 0 = PATINDEX(@pattern, token COLLATE Latin1_General_BIN);
 GO
